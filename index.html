@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quà Bí Mật 💖</title>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#000;
+}
+
+/* SCREEN */
+.screen{
+display:none;
+width:100%;
+height:100%;
+justify-content:center;
+align-items:center;
+position:absolute;
+flex-direction:column;
+}
+
+.active{display:flex;}
+
+/* BOX UI */
+.box{
+width:380px;
+padding:35px;
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border-radius:20px;
+text-align:center;
+border:1px solid rgba(255,255,255,.1);
+box-shadow:0 0 40px rgba(255,105,180,.15);
+}
+
+h1{color:#ff6fa8;margin-bottom:10px;}
+p{color:#ccc;margin-bottom:10px;}
+
+input{
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+margin-top:10px;
+outline:none;
+}
+
+button{
+width:100%;
+margin-top:15px;
+padding:14px;
+border:none;
+border-radius:10px;
+background:linear-gradient(135deg,#ff4d9d,#ff8ac6);
+color:white;
+font-size:16px;
+cursor:pointer;
+transition:.3s;
+}
+
+button:hover{transform:scale(1.05);}
+
+/* LETTER */
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:0;
+}
+
+.container{
+width:90%;
+max-width:850px;
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(25px);
+padding:35px;
+border-radius:25px;
+border:1px solid rgba(255,255,255,.1);
+z-index:2;
+}
+
+#title{
+color:#ff6fa8;
+text-align:center;
+font-size:38px;
+margin-bottom:20px;
+text-shadow:0 0 15px rgba(255,105,180,.5);
+}
+
+#letter{
+color:white;
+font-size:20px;
+line-height:2;
+white-space:pre-wrap;
+min-height:280px;
+}
+
+.cursor{animation:blink .7s infinite;}
+@keyframes blink{50%{opacity:0;}}
+
+</style>
+</head>
+
+<body>
+
+<!-- STEP 1 -->
+<div class="screen active" id="s1">
+<div class="box">
+<h1>💖 Quà Bí Mật</h1>
+<p>Nhập mật khẩu</p>
+<input id="pass" type="password" placeholder="******">
+<button onclick="step1()">Mở</button>
+</div>
+</div>
+
+<!-- STEP 2 -->
+<div class="screen" id="s2">
+<div class="box">
+<h1>🌸 Nhập tên</h1>
+<p>Gọi cậu là gì?</p>
+<input id="name" type="text" placeholder="Ví dụ: Bé Yêu">
+<button onclick="step2()">Tiếp tục</button>
+</div>
+</div>
+
+<!-- STEP 3 -->
+<div class="screen" id="s3">
+<canvas id="bg"></canvas>
+
+<div class="container">
+<h1 id="title"></h1>
+<div id="letter"></div>
+</div>
+</div>
+
+<script>
+
+/* SCREEN SWITCH */
+function show(id){
+document.querySelectorAll(".screen").forEach(e=>e.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* PASSWORD */
+function step1(){
+const p=document.getElementById("pass").value.trim();
+
+/* FIX BUG CACHE: ép string rõ ràng */
+if(String(p)==="1702"){
+show("s2");
+}else alert("Sai mật khẩu 💔");
+}
+
+/* NAME */
+function step2(){
+const name=document.getElementById("name").value.trim();
+if(!name)return alert("Nhập tên đi 🌸");
+
+show("s3");
+start(name);
+}
+
+/* LETTER */
+function start(name){
+
+document.getElementById("title").innerText=`💖 Gửi ${name} 💖`;
+
+const text=`
+Chào ${name} 🌸
+
+Hôm nay là 1/6 💖
+
+Tớ không có món quà lớn,
+chỉ có một lời chúc nhỏ dành cho cậu.
+
+Chúc cậu luôn vui vẻ,
+cười thật nhiều,
+và luôn được yêu thương ✨
+
+Cảm ơn vì đã xuất hiện trong cuộc sống này 💗
+`;
+
+let i=0;
+const box=document.getElementById("letter");
+
+function type(){
+if(i<text.length){
+box.innerHTML=text.slice(0,i)+'<span class="cursor">|</span>';
+i++;
+setTimeout(type,22);
+}else box.innerHTML=text;
+}
+type();
+
+/* ===== GALAXY ===== */
+const scene=new THREE.Scene();
+
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,2000);
+camera.position.z=450;
+
+const renderer=new THREE.WebGLRenderer({
+canvas:document.getElementById("bg"),
+alpha:true,
+antialias:true
+});
+
+renderer.setSize(innerWidth,innerHeight);
+
+const geo=new THREE.BufferGeometry();
+const arr=[];
+
+for(let i=0;i<7000;i++){
+arr.push((Math.random()-0.5)*2000);
+arr.push((Math.random()-0.5)*2000);
+arr.push((Math.random()-0.5)*2000);
+}
+
+geo.setAttribute("position",new THREE.Float32BufferAttribute(arr,3));
+
+const mat=new THREE.PointsMaterial({
+size:2,
+color:0xff6fa8,
+transparent:true,
+opacity:0.9,
+blending:THREE.AdditiveBlending
+});
+
+const stars=new THREE.Points(geo,mat);
+scene.add(stars);
+
+/* animation */
+function animate(){
+requestAnimationFrame(animate);
+
+stars.rotation.y+=0.0008;
+stars.rotation.x+=0.0003;
+
+renderer.render(scene,camera);
+}
+animate();
+
+/* resize */
+window.addEventListener("resize",()=>{
+camera.aspect=innerWidth/innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(innerWidth,innerHeight);
+});
+
+}
+
+</script>
+
+</body>
+</html>
